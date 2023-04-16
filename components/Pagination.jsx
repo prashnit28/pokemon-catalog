@@ -1,5 +1,5 @@
 import _ from "lodash";
-const Pagination = ({ items, pageSize, currentPage, onPageChange }) => {
+const Pagination = ({ items, pageSize, currentPage, onPageChange,onNextClick,nextbtn }) => {
   const pageCount = items / pageSize;
   if (Math.ceil(pageCount) === 1) return null;
   const pages = _.range(1, pageCount + 1);
@@ -23,6 +23,21 @@ const Pagination = ({ items, pageSize, currentPage, onPageChange }) => {
               </a>
             </li>
           ))}
+          {nextbtn &&
+            <li
+              className={
+               "page-item"
+              }
+            >
+              <a
+                style={{ cursor: "pointer" }}
+                // onClick={() => onPageChange(page)}
+                onClick={()=> onNextClick(pages.length + 1)}
+                className="page-link"
+              >
+                Next Page
+              </a>
+            </li>}
         </ul>
       </nav>
     </>

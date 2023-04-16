@@ -36,7 +36,7 @@ export const getStaticProps = async () => {
         }
       }
     `,
-    variables: { first: 6000 }
+    variables: { first: 60 }
   });
   return {
     props: {
@@ -50,16 +50,63 @@ const index = ({ data }) => {
   const pageSize = 20;
 
   const [currentPage, setCurrentPage] = useState(1);
-
-
+  const [maindata,setmaindata] = useState(data)
+  const [nextbtn,setnextbtn] = useState(false)
   const indexOfLastData = currentPage * pageSize;
   const indexOfFirstData = indexOfLastData - pageSize;
-  const currentData = data.slice(indexOfFirstData, indexOfLastData);
+  const currentData = maindata.slice(indexOfFirstData, indexOfLastData);
 
   const handlePageChange = (page) => {
+    if(page==3)
+    {
+      setnextbtn(true);
+    }
     setCurrentPage(page);
   };
 
+  const fetchdata = async (length) => {
+    const client = new ApolloClient({
+      uri: 'https://graphql-pokemon2.vercel.app/',
+      cache: new InMemoryCache()
+    });
+
+    const { data } = await client.query({
+      query: gql`
+      query pokemons($first: Int!){
+        pokemons(first: $first){
+          id
+          number
+          name
+          weight {
+            minimum
+            maximum
+          }
+          height {
+            minimum
+            maximum
+          }
+          classification
+          types
+          resistant
+          weaknesses
+          fleeRate
+          maxCP
+          maxHP
+          image
+          }
+        }
+      `,
+      variables: { first: length*20 }
+    });
+    const currentlength = data.pokemons.length;
+    const prelength = (length-1)*20;
+    setmaindata(data.pokemons);
+    if(currentlength>prelength)
+    {
+      setCurrentPage(length);
+    }
+    else{setnextbtn(false)}
+  }
 
   return (
     <>
@@ -77,10 +124,12 @@ const index = ({ data }) => {
       </div>
       <Card data={currentData}></Card>
       <Pagination
-        items={data.length}
+        items={maindata.length}
         pageSize={pageSize}
         currentPage={currentPage}
         onPageChange={handlePageChange}
+        onNextClick={fetchdata}
+        nextbtn={nextbtn}
       />
     </>
   )
